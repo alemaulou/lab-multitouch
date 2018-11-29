@@ -3,8 +3,10 @@ package edu.uw.animdemo
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat.startActivity
 import android.support.v4.view.GestureDetectorCompat
 import android.support.v4.view.MotionEventCompat
 import android.support.v7.app.AppCompatActivity
@@ -14,6 +16,9 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.support.v4.view.MotionEventCompat.getActionIndex
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         view = findViewById(R.id.drawingView) as DrawingSurfaceView?
 
         radiusAnim = AnimatorInflater.loadAnimator(this, R.animator.animations) as AnimatorSet
@@ -35,6 +39,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // get pointer index from the event object
+        val pointerIndex = event.getActionIndex()
+        val pointerId = event.getPointerId(pointerIndex)
         //Log.v(TAG, event.toString());
 
         val gesture = mDetector!!.onTouchEvent(event) //ask the detector to handle instead
@@ -62,17 +69,43 @@ class MainActivity : AppCompatActivity() {
                 //                view.ball.cy = y;
                 //                view.ball.dx = (x - view.ball.cx)/Math.abs(x - view.ball.cx)*30;
                 //                view.ball.dy = (y - view.ball.cy)/Math.abs(y - view.ball.cy)*30;
+
                 return true
             }
+
+            MotionEvent.ACTION_POINTER_DOWN
+            -> {
+                Log.v(TAG, "subsequent fingers down");
+
+            }
+
             MotionEvent.ACTION_MOVE //move finger
-            ->
-                //Log.v(TAG, "finger move");
-                //                view.ball.cx = x;
-                //                view.ball.cy = y;
-                return true
+            -> {
+                Log.v(TAG, "finger move");
+            //                view.ball.cx = x;
+            //                view.ball.cy = y;
+            return true
+        }
             MotionEvent.ACTION_UP //lift finger up
-                , MotionEvent.ACTION_CANCEL //aborted gesture
-                , MotionEvent.ACTION_OUTSIDE //outside bounds
+            -> {
+                Log.v(TAG, "lift finger up");
+
+
+                return true
+        }
+            MotionEvent.ACTION_POINTER_UP
+            -> {
+                Log.v(TAG, "subsequent fingers up");
+
+            }
+        MotionEvent.ACTION_CANCEL //aborted gesture
+        -> {
+            Log.v(TAG, "abort gesture");
+
+            return true
+        }
+
+            MotionEvent.ACTION_OUTSIDE //outside bounds
             -> return super.onTouchEvent(event)
             else -> return super.onTouchEvent(event)
         }
